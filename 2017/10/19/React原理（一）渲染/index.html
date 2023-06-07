@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="baidu-site-verification" content="jyJkxH3Q8Z">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.6" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.gif?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.gif?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.gif?v=6.0.6">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.6',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="React是声明式的在React中，写一个组件，通常会这么写12345class Mycomponent extends React.Component &amp;#123;    render () &amp;#123;        return &amp;lt;div&amp;gt;hello&amp;lt;/div&amp;gt;    &amp;#125;&amp;#125; 其中，return的内容，会被编译为12345class Mycompon">
+<meta name="keywords" content="JavaScript,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React原理（一）渲染">
+<meta property="og:url" content="http://yoursite.com/2017/10/19/React原理（一）渲染/index.html">
+<meta property="og:site_name" content="Lyanbin">
+<meta property="og:description" content="React是声明式的在React中，写一个组件，通常会这么写12345class Mycomponent extends React.Component &amp;#123;    render () &amp;#123;        return &amp;lt;div&amp;gt;hello&amp;lt;/div&amp;gt;    &amp;#125;&amp;#125; 其中，return的内容，会被编译为12345class Mycompon">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2023-06-07T08:46:25.095Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React原理（一）渲染">
+<meta name="twitter:description" content="React是声明式的在React中，写一个组件，通常会这么写12345class Mycomponent extends React.Component &amp;#123;    render () &amp;#123;        return &amp;lt;div&amp;gt;hello&amp;lt;/div&amp;gt;    &amp;#125;&amp;#125; 其中，return的内容，会被编译为12345class Mycompon">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/19/React原理（一）渲染/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>React原理（一）渲染 | Lyanbin</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Lyanbin</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">恰同学少年！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="https://lyanbin.github.io/resume" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/19/React原理（一）渲染/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Lyanbin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lyanbin">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">React原理（一）渲染</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-19T17:37:55+08:00">2017-10-19</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="React是声明式的"><a href="#React是声明式的" class="headerlink" title="React是声明式的"></a>React是声明式的</h3><p>在<code>React</code>中，写一个组件，通常会这么写<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Mycomponent</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    render () &#123;</span><br><span class="line">        <span class="keyword">return</span> &lt;div&gt;hello&lt;/div&gt;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中，<code>return</code>的内容，会被编译为<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Mycomponent</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    render () &#123;</span><br><span class="line">        <span class="keyword">return</span> React.createElement(<span class="string">'div'</span>, <span class="literal">null</span>, <span class="string">'hello'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在某种意义上说，我们是通过调用了<code>React.createElement</code>来创建<br>一个组件。但是，事实上我们仅仅是声明了这个组件，然后<code>React</code>帮助我们实例化了这个组件对象，并调用<code>render()</code>来创建了这个组件。我们仅仅需要描述我们需要什么，剩下的全部由<code>React</code>渲染页面。</p>
+<a id="more"></a>
+<h3 id="React的渲染基础渲染原理"><a href="#React的渲染基础渲染原理" class="headerlink" title="React的渲染基础渲染原理"></a>React的渲染基础渲染原理</h3><p>接下来，靠着这个思想，来创建一个假的<code>React</code>，这里暂且叫它为<code>Feact</code>吧。</p>
+<p>首先，要实现<code>React</code>，我们分解问题来看，就是要实现一个</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Feact.render(&lt;h1&gt;hello world&lt;/h1&gt;, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>));</span><br></pre></td></tr></table></figure>
+<p>简单了解<code>React</code>就会知道，<code>render()</code>方法的第一个参数，是<code>jsx</code>语法，这里暂时不考虑<code>jsx</code>的编译，问题继续被降级，那么就是要实现一个</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Feact.render(</span><br><span class="line">    Feact.createElement(<span class="string">'h1'</span>, <span class="literal">null</span>, <span class="string">'hello world'</span>),</span><br><span class="line">    <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>也就是说，<code>Feact</code>对象中，目前必须得有2个方法，一个是<code>createElement()</code>, 一个是<code>render()</code>。其中，<code>createElement()</code>方法返回一个普通的<code>json</code>对象，来描述<code>dom</code>。所以，目前，我们的<code>Feact</code>对象应该张这个样子</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Feact = &#123;</span><br><span class="line">   createElement(type, props, children) &#123;</span><br><span class="line">        <span class="keyword">const</span> element = &#123;</span><br><span class="line">            type,</span><br><span class="line">            props: props || &#123;&#125;</span><br><span class="line">        &#125;;</span><br><span class="line">       </span><br><span class="line">       <span class="keyword">if</span> (children) &#123;</span><br><span class="line">            element.props.children = children;</span><br><span class="line">        &#125;</span><br><span class="line">       </span><br><span class="line">        <span class="keyword">return</span> element;</span><br><span class="line">   &#125;</span><br><span class="line">   render() &#123;</span><br><span class="line">    </span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>那么<code>render</code>函数，从上面可以得知，<code>render()</code>接收两个参数，一个是描述<code>dom</code>的对象，一个是被插入的位置。也就是说<code>render()</code>应该长的像这样子</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">render(element, container) &#123;</span><br><span class="line">    <span class="keyword">const</span> componentInstance = <span class="keyword">new</span> FeactDomComponent(element);</span><br><span class="line">    <span class="keyword">return</span> componentInstance.mountComponent(container);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中，<code>FeactDomComponent</code>对象用来生成<code>dom</code>，然后调用该对象中的<code>mountComponent</code>方法来实现挂载。所以<code>FeactDomComponent</code>对象至少应该是这个样子</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FeactDomComponent</span> </span>&#123;</span><br><span class="line">    <span class="comment">/* element 即为描述dom的json对象 */</span></span><br><span class="line">    <span class="keyword">constructor</span>(element) &#123;</span><br><span class="line">        <span class="keyword">this</span>._currentElement = element;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    mountComponent(container) &#123;</span><br><span class="line">        <span class="keyword">const</span> domElement = <span class="built_in">document</span>.createElement(<span class="keyword">this</span>._currentElement.type);</span><br><span class="line">        <span class="keyword">const</span> text = <span class="keyword">this</span>._currentElement.props.text;</span><br><span class="line">        <span class="keyword">const</span> textNode = <span class="built_in">document</span>.createTextNode(text);</span><br><span class="line">        domElement.appendChild(textNode);</span><br><span class="line">        </span><br><span class="line">        container.appendChild(domElement);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 这里暂时没啥用，后面更新的时候会用到</span></span><br><span class="line">        <span class="keyword">this</span>._hostNode = domElement;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> domElement;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>给以上代码组装下，一个最基本的<code>Feact</code>就组件完成了。</p>
+<h3 id="用户自定义组件"><a href="#用户自定义组件" class="headerlink" title="用户自定义组件"></a>用户自定义组件</h3><p>以上得到的仅仅是一个写死的组件，下面加入用户可配置功能。所以，<code>Feact</code>需要添加一个<code>createClass()</code>方法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Feact = &#123;</span><br><span class="line"></span><br><span class="line">    createElement() &#123;</span><br><span class="line">        <span class="comment">/* 跟上头一样 */</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    createClass(spec) &#123;</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">Constructor</span>(<span class="params">props</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.props = props;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        Constructor.prototype.render = spec.render;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> Constructor;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    render(element, container) &#123;</span><br><span class="line">        <span class="comment">// 之前的render不能接收用户自定义的组件，这里待会儿修改</span></span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> MyTitle = Feact.createClass(&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> Feact.createElement(<span class="string">'h1'</span>, <span class="literal">null</span>, <span class="keyword">this</span>.props.message);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">Feact.render(&#123;</span><br><span class="line">    Feact.createElement(MyTitle, &#123; <span class="attr">message</span>: <span class="string">'i am here'</span> &#125;),</span><br><span class="line">    <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>现在，可以<code>Feact</code>可以接收自定义的组件了。就差改写<code>render()</code>方法了。但是，目前来看，<code>render()</code>方法利用<code>FeactDomComponent</code>对象仅仅处理原生的<code>dom</code>。需要进行改造，添加一个<code>FeactCompositeComponentWrapper</code>来包裹<code>FeactDomComponent</code>对象</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">render(element, container) &#123;</span><br><span class="line">    <span class="keyword">const</span> componentInstance = <span class="keyword">new</span> FeactCompositeComponentWrapper(element);</span><br><span class="line">    <span class="keyword">return</span> componentInstance.mountComponent(container);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FeactCompositeComponentWrapper</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(element) &#123;</span><br><span class="line">        <span class="keyword">this</span>._currentElement = element;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    mountComponent(container) &#123;</span><br><span class="line">        <span class="comment">/* 目前Component是一个构造函数 */</span></span><br><span class="line">        <span class="keyword">const</span> Component = <span class="keyword">this</span>._currentElement.type;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">const</span> componentInstance = <span class="keyword">new</span> Component(<span class="keyword">this</span>._currentElement.props);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">const</span> element = componentInstance.render();</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">const</span> domComponentInstance = <span class="keyword">new</span> FeactDOMComponent(element);</span><br><span class="line">        <span class="keyword">return</span> domComponentInstance.mountComponent(container);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>到目前为止，<code>Feact</code>已经能处理一些用户自定义的组件以及原生组件，但是在<code>render()</code>方法中，假如存在自定义组件嵌套的话，目前还不能胜任，比如一个组件如下所示，<code>MyMessage</code>嵌套了<code>Mytitle</code>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> MyMessage = Feact.createClass(&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.props.asTitle) &#123;</span><br><span class="line">            <span class="keyword">return</span> Feact.createElement(Mytitle, &#123;</span><br><span class="line">                message: <span class="keyword">this</span>.props.message</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> Feact.createElement(<span class="string">'p'</span>, <span class="literal">null</span>, <span class="keyword">this</span>.props.message)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这样的话，我们必须在<code>FeactCompositeComponentWrapper</code>中的<code>mountComponent</code>方法里，做一些简单的逻辑判断。那么，<code>FeactCompositeComponentWrapper</code>改写为：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FeactCompositeComponentWrapper</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(element) &#123;</span><br><span class="line">        <span class="keyword">this</span>._currentELement = element;</span><br><span class="line">    &#125;</span><br><span class="line">    mountComponent(container) &#123;</span><br><span class="line">        <span class="keyword">const</span> Component = <span class="keyword">this</span>._currentElement.type;</span><br><span class="line">        <span class="keyword">const</span> componentInstance = <span class="keyword">new</span> Component(<span class="keyword">this</span>._currentElement.props);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">let</span> element = componentInstance.render();</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">typeof</span> element.type === <span class="string">'function'</span>) &#123;</span><br><span class="line">            element = (<span class="keyword">new</span> element.type(element.props)).render();</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">const</span> domComponentInstance = <span class="keyword">new</span> FeactDomComponent(element);</span><br><span class="line">        domComponentInstance.mountComponent(container);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>目前来看，<code>Feact</code>已经更加完善了，但是目前的生命周期还有问题，后续再解决。<br>另外，在<code>Feact.render()</code>执行的时候，无论组件是自定义组件还是原生的<code>dom</code>，我们发现他们终归会执行到<code>FeactDOMComponent</code>，所以这里为了统一处理，我们可以给所有的组件包裹一个工厂函数，让他成为自定义组件，方便我们后续处理。</p>
+<p>工厂函数很简单，如下所示</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> TopLevelWrapper = <span class="function"><span class="keyword">function</span> (<span class="params">props</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.props = props;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">TopLevelWrapper.prototype.render = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.props;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Feact = &#123;</span><br><span class="line">    render(element, container) &#123;</span><br><span class="line">        <span class="keyword">const</span> warpperElement = <span class="keyword">this</span>.createElement(TopLevelWrapper, element);</span><br><span class="line">        <span class="keyword">const</span> componentInstance = <span class="keyword">new</span> FeactCompositeComponentWrapper(wrapperElement);</span><br><span class="line">        <span class="keyword">return</span> componentInstance.mountComponent(container);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/18/诚惶诚恐/" rel="next" title="诚惶诚恐">
+                <i class="fa fa-chevron-left"></i> 诚惶诚恐
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/15/React原理（二）生命周期/" rel="prev" title="React原理（二）生命周期">
+                React原理（二）生命周期 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Lyanbin">
+            
+              <p class="site-author-name" itemprop="name">Lyanbin</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Lyanbin" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#React是声明式的"><span class="nav-number">1.</span> <span class="nav-text">React是声明式的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#React的渲染基础渲染原理"><span class="nav-number">2.</span> <span class="nav-text">React的渲染基础渲染原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用户自定义组件"><span class="nav-number">3.</span> <span class="nav-text">用户自定义组件</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Lyanbin</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.6"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.6"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.6"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

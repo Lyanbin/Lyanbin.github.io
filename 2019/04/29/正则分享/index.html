@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="baidu-site-verification" content="jyJkxH3Q8Z">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.6" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.gif?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.gif?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.gif?v=6.0.6">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.6',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="正则表达式本次分享，帮助大家整体过一遍正则表达式的常用基础知识点，能够在以后的工作中，举一反三，不必害怕。 从最简单开始——尽可能严谨的给出匹配规则现在有一串坚果pro在微信下的useragent信息，通过大量的观察，可以发现，所有的坚果pro都有一个OD标识，且后面紧跟一串数字作为他的具体型号。1Mozilla/5.0 (Linux; U; Android 7.1.1; zh-CN; OD105">
+<meta name="keywords" content="JavaScript,Regex">
+<meta property="og:type" content="article">
+<meta property="og:title" content="正则分享">
+<meta property="og:url" content="http://yoursite.com/2019/04/29/正则分享/index.html">
+<meta property="og:site_name" content="Lyanbin">
+<meta property="og:description" content="正则表达式本次分享，帮助大家整体过一遍正则表达式的常用基础知识点，能够在以后的工作中，举一反三，不必害怕。 从最简单开始——尽可能严谨的给出匹配规则现在有一串坚果pro在微信下的useragent信息，通过大量的观察，可以发现，所有的坚果pro都有一个OD标识，且后面紧跟一串数字作为他的具体型号。1Mozilla/5.0 (Linux; U; Android 7.1.1; zh-CN; OD105">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2023-06-07T08:46:25.097Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="正则分享">
+<meta name="twitter:description" content="正则表达式本次分享，帮助大家整体过一遍正则表达式的常用基础知识点，能够在以后的工作中，举一反三，不必害怕。 从最简单开始——尽可能严谨的给出匹配规则现在有一串坚果pro在微信下的useragent信息，通过大量的观察，可以发现，所有的坚果pro都有一个OD标识，且后面紧跟一串数字作为他的具体型号。1Mozilla/5.0 (Linux; U; Android 7.1.1; zh-CN; OD105">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/04/29/正则分享/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>正则分享 | Lyanbin</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Lyanbin</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">恰同学少年！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="https://lyanbin.github.io/resume" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/29/正则分享/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Lyanbin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lyanbin">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">正则分享</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-29T15:56:16+08:00">2019-04-29</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h1><p>本次分享，帮助大家整体过一遍正则表达式的常用基础知识点，能够在以后的工作中，举一反三，不必害怕。</p>
+<h2 id="从最简单开始——尽可能严谨的给出匹配规则"><a href="#从最简单开始——尽可能严谨的给出匹配规则" class="headerlink" title="从最简单开始——尽可能严谨的给出匹配规则"></a>从最简单开始——尽可能严谨的给出匹配规则</h2><p>现在有一串<code>坚果pro</code>在微信下的useragent信息，通过大量的观察，可以发现，所有的<code>坚果pro</code>都有一个<code>OD</code>标识，且后面紧跟一串数字作为他的具体型号。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mozilla/5.0 (Linux; U; Android 7.1.1; zh-CN; OD105 Build/NMF26F) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.108 UCBrowser/12.1.3.993 Mobile Safari/537.36</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>自然的，立刻想到了一个最简单的正则表达式<code>/OD/</code>。<br>问题马上就来了，考虑如下正则<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mozilla/5.0 (iPOD; CPU iPhone OS 6_0_1 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A523 Safari/8536.25</span><br></pre></td></tr></table></figure></p>
+<p>使用<code>/OD/</code>竟然也测试通过了？但是这一条，是早期<code>ipod toch</code>的ua信息。<br><br><br>为了避免类似的情况，我们的正则表达式至少应该写成这样<code>/\bOD\d+/</code>，其中<code>\b</code>匹配一个单词的开头或者结尾（注：它是一个位置，不是单词和单词之间的空格），<code>\d</code>代表数字，<code>+</code>代表出现的次数为至少出现1次。其中<code>\d\</code>、<code>\b</code>和<code>+</code>，被称为<code>元字符</code>，其中<code>+</code>表示数量，有时候也被称之为限定符。接下来详细展开这2个类型。</p>
+<h2 id="元字符"><a href="#元字符" class="headerlink" title="元字符"></a>元字符</h2><p>除了<code>\d\</code>和<code>\b</code>，常用的元字符如下所示</p>
+<table>
+<thead>
+<tr>
+<th>元字符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.</td>
+<td>匹配除了换行符外任意字符</td>
+</tr>
+<tr>
+<td>\s</td>
+<td>匹配任意的空白符</td>
+</tr>
+<tr>
+<td>\d</td>
+<td>匹配数字</td>
+</tr>
+<tr>
+<td>\w</td>
+<td>匹配字母、数字、下划线、汉字</td>
+</tr>
+<tr>
+<td>\b</td>
+<td>匹配单词边界</td>
+</tr>
+<tr>
+<td>^</td>
+<td>匹配字符串的开始</td>
+</tr>
+<tr>
+<td>$</td>
+<td>匹配字符串的结束</td>
+</tr>
+</tbody>
+</table>
+<p>仍然以上面提到的useragent为例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mozilla/5.0 (iPOD; CPU iPhone OS 6_0_1 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A523 Safari/8536.25</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><code>.</code>匹配除了换行符的任意字符，如果没做全局匹配，则匹配结果为整个ua信息的首字母<code>M</code>，单独使用没啥意义</li>
+<li><code>\s</code>匹配了ua信息中的空格，如果没做全局匹配，则匹配结果为<code>Mozilla/5.0</code>后面的空格</li>
+<li><code>\d</code>匹配数字，上面有提过，如果没做全局匹配，匹配结果为<code>5</code></li>
+<li><code>\w</code>匹配字母、数字、下划线、汉字，如果没做全局匹配，匹配结果为<code>M</code></li>
+<li><code>\b</code>匹配边界，一般是配合别的一起使用，比如<code>\bA</code>，如果没做全局匹配，匹配结果为<code>AppleWebKit</code>的首字母<code>A</code></li>
+<li><code>^</code>匹配字符串的开始，一般是配合别的一起用，比如<code>^\w</code>，匹配结果为整个ua信息的首字母<code>M</code></li>
+<li><code>$</code>匹配字符串的结束，一般是配合别的一起用，比如<code>\w$</code>，匹配结果为整个ua薪资的最后一个数字<code>5</code></li>
+</ul>
+<p>注： <code>$</code>和<code>^</code>都是为了写出更精准的匹配条件。<br><br></p>
+<h4 id="道理我都懂，看了不会用。"><a href="#道理我都懂，看了不会用。" class="headerlink" title="道理我都懂，看了不会用。"></a>道理我都懂，看了不会用。</h4><p><br><br>举个栗子，判断一个串，是不是手机号</p>
+<ul>
+<li>粗糙一点，<code>\d{11}</code>，一个数字重复11次就行了。但是形如<code>12345678987654321</code>或者<code>abc12345678987645sdf</code>也会通过，怎么办？</li>
+<li>加个限制<code>^\d{11}$</code>，一个数字重复11次，且必须是数字作为串的开头，数字作为串的结尾。但是<code>01234567898</code>也会通过，有<code>0</code>开头的手机号么？没有。</li>
+<li>加个限制<code>^1\d{10}$</code>，是不是好多了？到目前为止，我们先写到这里</li>
+</ul>
+<h2 id="限定符"><a href="#限定符" class="headerlink" title="限定符"></a>限定符</h2><table>
+<thead>
+<tr>
+<th>限定符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>*</td>
+<td>重复0次或者更多次</td>
+</tr>
+<tr>
+<td>+</td>
+<td>重复1次或者更多次</td>
+</tr>
+<tr>
+<td>?</td>
+<td>重复0次或者1次</td>
+</tr>
+<tr>
+<td>{n}</td>
+<td>重复n次</td>
+</tr>
+<tr>
+<td>{n,}</td>
+<td>重复n次或者更多次</td>
+</tr>
+<tr>
+<td>{n,m}</td>
+<td>重复n到m次</td>
+</tr>
+</tbody>
+</table>
+<p>限定符的使用比较简单，仍然以上面提到的useragent为例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mozilla/5.0 (iPOD; CPU iPhone OS 6_0_1 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A523 Safari/8536.25</span><br></pre></td></tr></table></figure>
+<p>比如我们要提取ua中最后的<code>Safari/8536.25</code>，我们假定<code>Safari/</code>后面的数字是版本号，且小数点不是必须的。</p>
+<ul>
+<li>最粗糙的，可以写<code>Safari\/\d+</code>但是小数点会被忽略</li>
+<li>改造下，可以写<code>Safari\/\d+\.\d+</code>但是没小数点的就挂了</li>
+<li>再改造下，可以写<code>Safari\/\d+\.?\d*</code></li>
+<li>同样的，如果确定是完整的一个串，且不与正文混合，<code>Safari\/\d+\.?\d*</code>，但是问题又来了，<code>Safari/12.</code>也能通过？</li>
+<li>原来，<code>.</code>和后面的数字，必须同时出现，所以<code>Safari\/\d+(\.\d+)?</code> 这样是不是好多了？</li>
+</ul>
+<h2 id="转义"><a href="#转义" class="headerlink" title="转义"></a>转义</h2><p>你应该发现了，跟元字符一样的匹配，需要使用<code>\</code>反斜杠来转义。比如我们刚刚<code>Safari/8536.25</code>中的<code>/</code>在匹配时，需要写为<code>\/</code>，中间的小数点，在匹配时，也要写为<code>\.</code>。其他元字符同理。</p>
+<h2 id="类和条件"><a href="#类和条件" class="headerlink" title="类和条件"></a>类和条件</h2><p>如果单独想匹配出数字、字母、空白等，有元字符已经可以直接帮助获取，有木有自己建立的集合呢？<br>考虑我们刚刚所写的手机号匹配<code>^1\d{10}$</code>，这里限制了第一位数，必须是<code>1</code>,那么，第二位数字是不是也可以限制下，保证匹配更加准确？目前已知的第二位有<code>35678</code>,我们可以使用<code>[34678]</code>来表示匹配其中的一个。<br>更改后的正则为<code>^1[34678]\d{9}$</code>，这样就准确多了。<br>对于连贯性的数字或者字母，<code>[]</code>内甚至可以直接写<code>[0-9]</code>，等价于<code>\d</code>，同样的，字母的匹配可以写<code>[a-z][A-Z]</code>，甚至可以组合使用<code>[0-9a-zA-Z]</code>,如果再加上一个下划线，<code>[0-9a-zA-Z_]</code>，等价于<code>\w</code>。<br><br><br>但是，pm不要脸，换需求了<br><br><br>pm要求，匹配15开头的号段，结尾必须是0，匹配13开头的号段，结尾必须是1。<br>本能反应，我们噼里啪啦甩出去<code>^1[35]\d{8}[01]$</code>，但不幸的是同样的，15开头的号段匹配了<code>1</code>结尾，13号段也匹配了<code>0</code>结尾。<br>最粗糙的写法，<code>^13\d{8}[0]$|^15\d{8}[1]$</code>，看着像不像2个正则表达式给拼起来了？中间用了个 <code>|</code>分割了下？你会优化么？<br>这里<code>|</code>即为正则表达式的条件。同样的场景，由于<code>javascript</code>内，对正则的支持有限，无法满足对括号的匹配，所以对于简单的括号情况，需要用条件语法去处理。但是，对于复杂的括号需求，还是建议使用递归，进行处理。</p>
+<h1 id="逆匹配"><a href="#逆匹配" class="headerlink" title="逆匹配"></a>逆匹配</h1><p>上面，提到了常用的元字符，以及自定义的类，还有一种常用的需求，求一个类的倪匹配，比如，需要匹配除了数字以外，其他所有的情况。这时候需要用逆匹配来进行处理，规则非常简单：</p>
+<table>
+<thead>
+<tr>
+<th>元字符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\S</td>
+<td>匹配任意的非空白符</td>
+</tr>
+<tr>
+<td>\D</td>
+<td>匹配非数字</td>
+</tr>
+<tr>
+<td>\W</td>
+<td>匹配非字母、非数字、非下划线、非汉字</td>
+</tr>
+<tr>
+<td>\B</td>
+<td>匹配非单词边界</td>
+</tr>
+<tr>
+<td>[^abc]</td>
+<td>匹配非abc的其他所有</td>
+</tr>
+</tbody>
+</table>
+<p>特殊的地方只有1处，就是对自定义类的逆匹配，需要一个<code>[^]</code>进行区分，常用的需求为，匹配一个xml标签，通常这么写<code>&lt;[^\s&gt;]+&gt;</code>。</p>
+<h1 id="分组与引用"><a href="#分组与引用" class="headerlink" title="分组与引用"></a>分组与引用</h1><p>对于分组，上面应该已经注意到，我们已经很顺其自然的写出了一个形如<code>Safari\/\d+(\.\d+)?</code>的正则，这里面的<code>()</code>即分组。分组非常有用，比如对单个字符的数量控制，可以使用限定符控制，对于一组字符串的处理，加个<code>()</code>就可以了。比如上面刚刚所写的<code>(\.\d+)?</code>就是小数点和数字在一个括号内，后面的限定符<code>?</code>，表示必须同时出现。<br><br><br>对于分组，更多的应用场景，其实是引用。考虑一个需求，有一串电话号码<code>&lt;010&gt;85600596</code>，我们需要匹配他的区号，他的区号，都会以尖括号包括</p>
+<ul>
+<li>粗糙的，我们写出了<code>&lt;\d{3,4}&gt;\d{7,8}</code>，因为区号有3-4位数，电话号码有7-8位数。但是这个正则在使用的时候，只能<code>&#39;&lt;010&gt;85600596&#39;.match(/&lt;\d{3,4}&gt;\d{7,8}/)</code>，怎么能在确认了是电话号码的情况下，拿到区号？</li>
+<li>增加分组<code>&lt;(\d{3,4})&gt;\d{7,8}</code>，这样，<code>let res = &#39;&lt;010&gt;85600596&#39;.match(&lt;(\d{3,4})&gt;\d{7,8})</code>就能在结果内，<code>res[1]</code>拿到我们的区号<code>010</code>。</li>
+</ul>
+<p>对于引用，还有一种使用方式，叫向后引用。考虑一个字符串，<code>&#39;abc&#39;</code>，它的引号，有可能是<code>&#39;</code>也有可能是<code>&quot;</code>，做匹配怎么处理？</p>
+<ul>
+<li>仍然最粗糙的开始，写出了<code>[&#39;&quot;][a-z]+[&#39;&quot;]</code>，不幸的是，<code>&#39;abc&quot;</code>这样的字符串竟然也能通过。</li>
+<li>这里考虑使用向后引用，<code>([&#39;&quot;])[a-z]+\1</code>，考虑这里的<code>\1</code>，意思是第一个分组。如果有多个括号，这个反斜杠的数字持续累加，对应的是从左到右的括号顺序，就是对应的分组。</li>
+</ul>
+<p>为了加深印象，我们看下一个偏实际的需求：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">div &#123;</span><br><span class="line">	background-image: url(&apos;https://a.com/b.png&apos;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们需要对<code>background-image</code>后面的<code>url</code>内容进行收集。但是，<code>url</code>的内容，可以是单引号，也可以是双引号。根据我们上面提到的知识点，很容易想到</p>
+<ul>
+<li>首先可以得出<code>url\(([&#39;&quot;])([^\s&#39;&quot;]+)\1\)</code></li>
+<li>观察可以发现，引号可以单双，但是也可以完全不要引号，还记得上面提过的限定符么？<code>url\(([&#39;&quot;])?([^\s&#39;&quot;]+)\1\)</code></li>
+</ul>
+<h1 id="不分组捕获和零宽断言"><a href="#不分组捕获和零宽断言" class="headerlink" title="不分组捕获和零宽断言"></a>不分组捕获和零宽断言</h1><p>为啥给这2个放到一起，因为他们的表达式很像，方便记忆。。<br>首先看下不分组捕获，考虑上面提到的<code>css</code>内容<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">div &#123;</span><br><span class="line">	background-image: url(&apos;https://a.com/b.png&apos;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>现在不但要考虑<code>url</code>的内容，还需要考虑<code>background-image</code></p>
+<ul>
+<li>粗糙的，<code>background-image\s*:\s*url\(([&#39;&quot;])?([^\s&#39;&quot;]+)\1\)</code>，因为冒号前后的空格个数，是随意的。</li>
+<li>但是不难发现，在编写<code>css</code>时，会有连写属性，比如<code>background: url(&#39;https://a.com/b.png&#39;)</code>，<code>-image</code>并不是必须，所以正则改写为<code>background(-image)?\s*:\s*url\(([&#39;&quot;])?([^\s&#39;&quot;]+)\2\)</code></li>
+<li>问题来了，刚刚我们<code>\1</code>的地方，现在改为了<code>\2</code>，但是<code>\1</code>并没有什么卵用，等于浪费了一个标号数字，怎么解决？</li>
+<li>不分组捕获的作用就来了，写法非常简单，<code>(?:)</code>即可。</li>
+<li>修改后的正则<code>background(?:-image)?\s*:\s*url\(([&#39;&quot;])?([^\s&#39;&quot;]+)\1\)</code>，这样，虽然前面有一个括号，但是并没有给他赋予<code>\1</code>的编号。</li>
+</ul>
+<p>零宽断言的例子，其实，在开始的时候已经提过了。零宽，顾名思义，匹配的是个位置，而不是实际的内容，也就是说<code>^</code>、<code>$</code>、<code>\b</code>都算是零宽断言。<br>考虑更复杂的需求，还是开头的那一行useragent<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Mozilla/5.0 (Linux; U; Android 7.1.1; zh-CN; OD105 Build/NMF26F) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/57.0.2987.108 UCBrowser/12.1.3.993 Mobile Safari/537.36</span><br></pre></td></tr></table></figure></p>
+<p>我们分析发现，在<code>OD105</code>这个手机型号之前，总是有一个系统语言的标识，我们想得到他。</p>
+<ul>
+<li>通过上面掌握的内容，可以轻松得到<code>([\w-]+);\s*\bOD\d+\b</code>，这样分组<code>\1</code>就是想要的内容。</li>
+<li>有木有更优雅的方法？<code>[\w-]+(?=;\s*\bOD\d+\b)</code>，注意这里的<code>(?=)</code>，代表的意思为<code>零宽正预测先行断言</code>，名字很屌，也相当拗口，只需记住，匹配以XXX为结尾的串，但是不捕获它，就ok了。</li>
+</ul>
+<p>同样的，有正预测，就有负预测，负预测的意思就是，匹配不以XXX为结尾的串，但是不捕获它。应用场景也很常见，这里举一个简单的例子，已知一个生日，匹配不是9月1日生的人，是哪一年生的。</p>
+<ul>
+<li><code>\d{4}(?!0901)</code>，<code>(?!)</code>的意思为<code>零宽负预测先行断言</code>。</li>
+</ul>
+<p>有正也有负，有先行，必然也有后发，然而，后发断言<code>javascript</code>不支持，感兴趣的同学可以自己搜索下学习。总结下：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>语法</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>不分组捕获</td>
+<td>(?:exp)</td>
+<td>匹配exp，但是不捕获，也不给分组，也没有组号</td>
+</tr>
+<tr>
+<td>零宽正预测先行断言</td>
+<td>(?=exp)</td>
+<td>匹配exp前面的内容，单独使用没意义</td>
+</tr>
+<tr>
+<td>零宽负预测先行断言</td>
+<td>(?!exp)</td>
+<td>匹配非exp前面的内容，单独使用没意义</td>
+</tr>
+</tbody>
+</table>
+<h1 id="贪婪与懒惰"><a href="#贪婪与懒惰" class="headerlink" title="贪婪与懒惰"></a>贪婪与懒惰</h1><p>正常的限定符，都是贪婪匹配，有时候，我们会使用懒惰匹配，只需在限定符后面加<code>?</code>即可。<br>举个栗子作为结束：<code>a.*b</code>，标识匹配a开头，b结尾的串</p>
+<ul>
+<li>对于输入<code>abbbbb</code>，<code>a.*b</code>将为贪婪匹配到整个字符串，也就是说匹配结果是<code>abbbbb</code></li>
+<li>如果将限定符后面加上<code>?</code>得到<code>a.*?b</code>，则同样的输入，输出只会是<code>ab</code></li>
+</ul>
+<h1 id="其他没聊到的"><a href="#其他没聊到的" class="headerlink" title="其他没聊到的"></a>其他没聊到的</h1><p>以上基本上为web开发中大部分的应用场景，至于平衡组、递归匹配等高级内容，目前已知的只有<code>.Net</code>环境下支持，感兴趣的话可以自己搜索。</p>
+<p>至于常用的正则学习方法，有2个网站供大家参考<br><a href="https://regexr.com/" target="_blank" rel="noopener">https://regexr.com/</a>   主要用来编写正则<br><a href="http://140.143.237.171/reg" target="_blank" rel="noopener">http://140.143.237.171/reg</a>  用来可视化正则，方便找错<br>玩的开心！</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+            <a href="/tags/Regex/" rel="tag"># Regex</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/01/28/Promise/" rel="next" title="Promise">
+                <i class="fa fa-chevron-left"></i> Promise
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Lyanbin">
+            
+              <p class="site-author-name" itemprop="name">Lyanbin</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Lyanbin" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#正则表达式"><span class="nav-number">1.</span> <span class="nav-text">正则表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#从最简单开始——尽可能严谨的给出匹配规则"><span class="nav-number">1.1.</span> <span class="nav-text">从最简单开始——尽可能严谨的给出匹配规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#元字符"><span class="nav-number">1.2.</span> <span class="nav-text">元字符</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#道理我都懂，看了不会用。"><span class="nav-number">1.2.0.1.</span> <span class="nav-text">道理我都懂，看了不会用。</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#限定符"><span class="nav-number">1.3.</span> <span class="nav-text">限定符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#转义"><span class="nav-number">1.4.</span> <span class="nav-text">转义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类和条件"><span class="nav-number">1.5.</span> <span class="nav-text">类和条件</span></a></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#逆匹配"><span class="nav-number">2.</span> <span class="nav-text">逆匹配</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分组与引用"><span class="nav-number">3.</span> <span class="nav-text">分组与引用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#不分组捕获和零宽断言"><span class="nav-number">4.</span> <span class="nav-text">不分组捕获和零宽断言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#贪婪与懒惰"><span class="nav-number">5.</span> <span class="nav-text">贪婪与懒惰</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他没聊到的"><span class="nav-number">6.</span> <span class="nav-text">其他没聊到的</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Lyanbin</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.6"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.6"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.6"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

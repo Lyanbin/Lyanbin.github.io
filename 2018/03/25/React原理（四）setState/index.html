@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="baidu-site-verification" content="jyJkxH3Q8Z">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.6" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/avatar.gif?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/avatar.gif?v=6.0.6">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/avatar.gif?v=6.0.6">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.6" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.6',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在这一节中，我们将给Feact增加setState方法，这个方法非常有趣，端起饮料好好享受吧。 给Feact添加statestate和props非常相似，他们都是组件在渲染的时候，流动在内部的数据。不同的是props来自于外部，state是内部的。到目前为止，Feact只支持props，所以，在我们搞出setState之前，我们得先给这个小框架增加个state这个概念。">
+<meta name="keywords" content="JavaScript,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React原理（四）setState">
+<meta property="og:url" content="http://yoursite.com/2018/03/25/React原理（四）setState/index.html">
+<meta property="og:site_name" content="Lyanbin">
+<meta property="og:description" content="在这一节中，我们将给Feact增加setState方法，这个方法非常有趣，端起饮料好好享受吧。 给Feact添加statestate和props非常相似，他们都是组件在渲染的时候，流动在内部的数据。不同的是props来自于外部，state是内部的。到目前为止，Feact只支持props，所以，在我们搞出setState之前，我们得先给这个小框架增加个state这个概念。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2023-06-07T08:46:25.095Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React原理（四）setState">
+<meta name="twitter:description" content="在这一节中，我们将给Feact增加setState方法，这个方法非常有趣，端起饮料好好享受吧。 给Feact添加statestate和props非常相似，他们都是组件在渲染的时候，流动在内部的数据。不同的是props来自于外部，state是内部的。到目前为止，Feact只支持props，所以，在我们搞出setState之前，我们得先给这个小框架增加个state这个概念。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/25/React原理（四）setState/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>React原理（四）setState | Lyanbin</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Lyanbin</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">恰同学少年！</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="https://lyanbin.github.io/resume" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/25/React原理（四）setState/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Lyanbin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lyanbin">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">React原理（四）setState</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-25T21:14:50+08:00">2018-03-25</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在这一节中，我们将给<code>Feact</code>增加<code>setState</code>方法，这个方法非常有趣，端起饮料好好享受吧。</p>
+<h3 id="给Feact添加state"><a href="#给Feact添加state" class="headerlink" title="给Feact添加state"></a>给<code>Feact</code>添加<code>state</code></h3><p><code>state</code>和<code>props</code>非常相似，他们都是组件在渲染的时候，流动在内部的数据。不同的是<code>props</code>来自于外部，<code>state</code>是内部的。到目前为止，<code>Feact</code>只支持<code>props</code>，所以，在我们搞出<code>setState</code>之前，我们得先给这个小框架增加个<code>state</code>这个概念。</p>
+<a id="more"></a>
+<h4 id="getInitialState"><a href="#getInitialState" class="headerlink" title="getInitialState"></a><code>getInitialState</code></h4><p>当我们挂载一个新组件的时候，我们需要给这个组件增加一个初始<code>state</code>，这个时候，我们需要调用<code>getInitialState</code>这个生命周期函数。该生命周期函数需要在实例化的时候被调用，所以，我们需要在<code>Feact.createClass</code>构造函数里增加钩子。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> Feact = &#123;</span><br><span class="line">    createClass(spec) &#123;</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">Constructor</span>(<span class="params">props</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.props = props;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">const</span> initialState = <span class="keyword">this</span>.getInitialState ? <span class="keyword">this</span>.getInitialState : <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">this</span>.state = initialState;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Constructor.prototype = <span class="built_in">Object</span>.assign(Constructor.prototype, spec);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Constructor;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>就像<code>props</code>一样，我们给组件实例增加<code>state</code>、</p>
+<blockquote>
+<p>注意，当我们组件没有<code>getInitialState</code>定义的时候，<code>state</code>的初始状态是<code>null</code>，<code>React</code>不会给<code>state</code>添加默认值为空对象。所以，当想使用<code>state</code>的时候，必须利用这个方法，返回一个对象。否则，如果在使用<code>this.state.foo</code>这样的操作的时候，第一次<code>render</code>会爆炸的哦。</p>
+</blockquote>
+<p>现在，有了<code>getInitialState</code>，<code>Feact</code>组件可以随时使用<code>this.state</code>这个方法啦。</p>
+<h3 id="增加简单的setState"><a href="#增加简单的setState" class="headerlink" title="增加简单的setState()"></a>增加简单的<code>setState()</code></h3><p>现在，我们准备给<code>setState</code>在<code>Feact.createClass</code>中，找一个合适的位置。为了实现它，我们将给所有的通过<code>Feact.createClass</code>创建的组件一个<code>prototype</code>，这个<code>prototype</code>将拥有一个<code>setState</code>方法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">FeactComponent</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">FeactComponent.prototype.setState = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// TODO</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">mixSpecIntoComponent</span>(<span class="params">Constructor, spec</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> proto = Constructor.prototype;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> key <span class="keyword">in</span> spec) &#123;</span><br><span class="line">        proto[key] = spec[key];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Feact = &#123;</span><br><span class="line">    createClass(spec) &#123;</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">Constructor</span>(<span class="params">props</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.props = props;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">const</span> initialState = <span class="keyword">this</span>.getInitialState ? <span class="keyword">this</span>.getInitialState() : <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">this</span>.state = initialState;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Constructor.prototype = <span class="keyword">new</span> FeactComponent();</span><br><span class="line"></span><br><span class="line">        mixSpecIntoComponent(Constructor, spec);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Constructor;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>misSpecIntoComponent</code>在<code>React</code>中，那可是相当的复杂，当然，也更健壮，它的角色更像是<code>mixins</code>，同时，保证用户在使用的时候，不会因为这个函数翻车。</p>
+<h3 id="让setState代入到updateComponent方法中"><a href="#让setState代入到updateComponent方法中" class="headerlink" title="让setState代入到updateComponent方法中"></a>让<code>setState</code>代入到<code>updateComponent</code>方法中</h3><p>回顾上一节，我们通过<code>FeactCompositeComponentWrapper.receiveComponent</code>来实现一个组件的更新，而这个函数接下来调用了<code>updateComponent</code>方法，所以，看起来我们只要通过<code>updateComponent</code>来处理<code>state</code>就能实现更新。那么，我们只需要将<code>FeactComponent.prototype.setState</code>和<code>FeactCompositeComponentWrapper.receiveComponent</code>打通即可。</p>
+<p>在<code>React</code>中，有『公共实例』和『内部实例』的概念。公共实例是通过<code>createClass</code>创建的组件的实例，内部实例是<code>React</code>内部对象的实例。那么，在这些概念下，内部实例就是<code>FeactCompositeComponentWrapper</code>，不难发现，内部实例能够感知到公共实例的一切，但是反过来却不行。现在，我们准备改变这个。<code>setState</code>是公共实例给内部实例通信的方法，带着这个想法，看如下实现</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">FeactComponent</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">FeactComponent.prototype.setState = <span class="function"><span class="keyword">function</span> (<span class="params">partialState</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> internalInstance = getMyInternalInstancePlease(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    internalInstance._pendingPartialState = partialState;</span><br><span class="line"></span><br><span class="line">    FeactReconciler.performUpdateIfNecessary(internalInstance);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>React</code>解决<code>getMyInternalInstancePlease</code>这个问题的方法是通过一个实例映射，这个映射保存了某个公共实例内的内部实例。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> FeactInstanceMap = &#123;</span><br><span class="line">    set(key, value) &#123;</span><br><span class="line">        key.__feactInternalInstance = value;</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    get(key) &#123;</span><br><span class="line">        <span class="keyword">return</span> key.__feactInternalInstance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而这个映射关系的建立，是在组件挂载的时候。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> FeactCompositeComponentWrapper &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其他都一样</span></span><br><span class="line"></span><br><span class="line">    mountComponent(container) &#123;</span><br><span class="line">        <span class="keyword">const</span> Component = <span class="keyword">this</span>._currentElement.type;</span><br><span class="line">        <span class="keyword">const</span> componentInstance = <span class="keyword">new</span> Component(<span class="keyword">this</span>._currentElement.props);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>._instance = componentInstance;</span><br><span class="line"></span><br><span class="line">        FeactInstanceMap.set(componentInstance, <span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在，还有一个没有用到的方法，<code>FeactReconciler.performUpdateIfNecessary</code>，这个方法就像其他的协调器方法一样</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> FeactReconciler &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 其他都一样</span></span><br><span class="line">    performUpdateIfNecessary(internalInstance) &#123;</span><br><span class="line">        internalInstance.performUpdateIfNecessary();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FeactCompositeComponentWrapper</span> </span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 其他都一样</span></span><br><span class="line">    performUpdateIfNecessary() &#123;</span><br><span class="line">        <span class="comment">// 注意这里，一样哦</span></span><br><span class="line">        <span class="keyword">this</span>.updateComponent(<span class="keyword">this</span>._currentElement, <span class="keyword">this</span>._currentElement);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最终，我们终于调用了<code>updateComponent</code>，但是请注意，这里我们做了一点HACK，虽然我们调用了更新，但是，我们传递了相同的两个参数。任何时候，当<code>updateComponet</code>传递了相同的元素，<code>React</code>就知道，只有<code>state</code>更新了，否则就是<code>props</code>更新了。<code>React</code>会通过<code>prevElement !== nextElement</code>来判断是否调用<code>componentWillReceiveProps</code>，所以，这里先改造下<code>Feact</code>，让它也做相同的处理。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FeactCompositeComponentWrapper</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其他都一样</span></span><br><span class="line">    updateComponent(prevElement, nextElement) &#123;</span><br><span class="line">        <span class="keyword">const</span> nextProps = nextElement.props;</span><br><span class="line">        <span class="keyword">const</span> inst = <span class="keyword">this</span>._instance;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">const</span> willReceive = prevElement !== nextElement;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (willReceive &amp;&amp; inst.componentWillReceiveProps) &#123;</span><br><span class="line">            inst.componentWillReceiveProps(nextProps);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 其他都一样</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个只是<code>updateComponent</code>的片段，只是为了解决<code>setState()</code>并不会导致<code>componentWillReceiveProps</code>在渲染前的调用。也就是说，<code>setState</code>无需影响到<code>props</code>。</p>
+<h4 id="通过新的state更新"><a href="#通过新的state更新" class="headerlink" title="通过新的state更新"></a>通过新的<code>state</code>更新</h4><p>现在处理<code>updateCompoent</code>，内部实例已经通过<code>internalInstance._pendingPartialState</code>获取到了新的<code>state</code>，所以现在我们需要做的，仅仅是让这个组件再渲染一次。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FeactCompositeComponentWrapper</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其他都一样</span></span><br><span class="line"></span><br><span class="line">    updateComponent(prevElement, nextElement) &#123;</span><br><span class="line">        <span class="keyword">const</span> nextProps = nextElement.props;</span><br><span class="line">        <span class="keyword">const</span> inst = <span class="keyword">this</span>._instance;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">const</span> willReceive = prevElement !== nextElement;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (willReceive &amp;&amp; inst.componentWillReceiveProps) &#123;</span><br><span class="line">            inst.componentWillReceiveProps(nextProps);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> shouldUpdate = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">const</span> nextState = <span class="built_in">Object</span>.assignn(&#123;&#125;, inst.state, <span class="keyword">this</span>._pendingPartialState);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>._pendingPartialState = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (inst.shouldComponentUpdate) &#123;</span><br><span class="line">            shouldUpdate = inst.shouldComponentUpdate(nextProps, nextState);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (shouldUpdate) &#123;</span><br><span class="line">            <span class="keyword">this</span>._performComponentUpdate(nextElement, nextProps, nextState);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            inst.props = nextProps;</span><br><span class="line">            inst.state = nextState;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _performComponentUpdate(nextElement, nextProps, nextState) &#123;</span><br><span class="line">        <span class="keyword">this</span>._currentElement = nextElement;</span><br><span class="line">        <span class="keyword">const</span> inst = <span class="keyword">this</span>._instance;</span><br><span class="line"></span><br><span class="line">        inst.props = nextProps;</span><br><span class="line">        inst.state = nextState;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>._updateRenderedComponent();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _updateRenderedComponent() &#123;</span><br><span class="line">        <span class="keyword">const</span> prevComponentInstance = <span class="keyword">this</span>._renderedComponent;</span><br><span class="line">        <span class="keyword">const</span> inst = <span class="keyword">this</span>._instance;</span><br><span class="line">        <span class="keyword">const</span> nextRenderedElement = inst.render();</span><br><span class="line"></span><br><span class="line">        FeactReconciler.receiveComponent(</span><br><span class="line">            prevComponentInstance,</span><br><span class="line">            nextRenderedElement</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>组件的更新跟之前很像，不同的是，我们增加了<code>state</code>的赋值操作。因为<code>state</code>仅仅挂载在公共实例上，<code>_performComponentUpdate</code>只改变了一行，<code>_updateRenderedComponent</code>一行没变。真正改变的重点就是在<code>updateComponent</code>中，我们合并<code>state</code>的操作。</p>
+<p>至此，<code>setState</code>的功能，已经基本完成啦！</p>
+<p>但是，上面的<code>setState</code>的实现，比较屌丝，性能也比较糟糕。主要的问题是，每次调用<code>setState</code>都会导致组件的渲染。这将迫使用户，要么好好想想怎么组装数据然后只使用一次<code>setState</code>，要么就接受这种每次调用就渲染的问题。接下来，我们要做的就是改造它，使它最好能自适应的具有批量工作的能力，从而减少渲染的次数。</p>
+<h3 id="批量调用setState"><a href="#批量调用setState" class="headerlink" title="批量调用setState"></a>批量调用<code>setState</code></h3><p>仔细观察生命周期函数的调用，不难发现，每次的渲染，都调用了<code>componentWillReceiveProps</code>。如果用户在<code>componentWillReceiveProps</code>中调用<code>setState</code>会发生什么？在当前的代码中，这将会导致在第一次渲染过程中又一次新的渲染，而对<code>state</code>改版而造成的<code>props</code>的响应，画面太美不敢看。所以，我们最好将一系列的<code>state</code>和<code>props</code>的改变，都塞到同一次渲染中。</p>
+<h4 id="首先我们需要给需要批量的操作保存起来"><a href="#首先我们需要给需要批量的操作保存起来" class="headerlink" title="首先我们需要给需要批量的操作保存起来"></a>首先我们需要给需要批量的操作保存起来</h4><p>首先想到的就是改造<code>_pendingPartialState</code>，让它成为一个数组。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">FeactComponent</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">FeactComponent.prototype.setState = <span class="function"><span class="keyword">function</span> (<span class="params">partialState</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> internalInstance = FeactInstanceMap.get(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    internalInstance._pendingPartialState = internalInstance._pendingPartialState || [];</span><br><span class="line"></span><br><span class="line">    internalInstance._pendingPartialState.push(partialState);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其他都一样</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而在<code>updateComponent</code>中，调用我们将要设计的合并<code>state</code>方法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FeactCompositeComponentWrapper</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 其他都一样</span></span><br><span class="line"></span><br><span class="line">    updateComponent(prevElement, nextElement) &#123;</span><br><span class="line">        <span class="comment">// 其他都一样</span></span><br><span class="line">        <span class="keyword">const</span> nextState = <span class="keyword">this</span>._processPendingState();</span><br><span class="line">        <span class="comment">// 其他都一样</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _processPendingState() &#123;</span><br><span class="line">        <span class="keyword">const</span> inst = <span class="keyword">this</span>._instance;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">this</span>._pendingPartialState) &#123;</span><br><span class="line">            <span class="keyword">return</span> inst.state;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> nextState = inst.state;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>._pendingPartialState.length; ++i) &#123;</span><br><span class="line">            nextState = <span class="built_in">Object</span>.assign(nextState, <span class="keyword">this</span>._pendingPartialState[i]);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>._pendingPartialState = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> nextState;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="其次将批量合并之后的state塞到一次渲染过程中"><a href="#其次将批量合并之后的state塞到一次渲染过程中" class="headerlink" title="其次将批量合并之后的state塞到一次渲染过程中"></a>其次将批量合并之后的<code>state</code>塞到一次渲染过程中</h4><blockquote>
+<p>注意这里的批量操作原理是非常简单的，并不是<code>React</code>中的全部功能。我们主要指出批量操作的原理。</p>
+</blockquote>
+<p>在<code>Feact</code>中，我们只在页面还在渲染的时候，批量合并<code>state</code>，其他时候，我们并不做这样的处理。所以，在<code>updateComponent</code>过程中，我们会做一个标记，告诉外面，我们正在渲染，在渲染结束之后，讲其设置为<code>false</code>。如果<code>setState</code>看到了这个标记为<code>true</code>，他会挂起这个<code>state</code>，但不渲染它。因为它知道，当当前的渲染结束的时候，渲染引擎会重拾这个<code>state</code>进行下一次渲染。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FeactCompositeComponent</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其他都一样</span></span><br><span class="line"></span><br><span class="line">    updateComponent(prevElement, nextElement) &#123;</span><br><span class="line">        <span class="keyword">this</span>._rendering = <span class="literal">true</span>;</span><br><span class="line">        <span class="comment">// 中间这一部分跟之前一样</span></span><br><span class="line">        <span class="keyword">this</span>._rendering = <span class="literal">false</span>;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">FeactComponent</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">FeactComponent.prototype.setState = <span class="function"><span class="keyword">function</span> (<span class="params">partialState</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> internalInstance = FeactInstanceMap.get(<span class="keyword">this</span>);</span><br><span class="line"></span><br><span class="line">    internalInstance._pendingPartialState = internalInstance._pendingPartialState || [];</span><br><span class="line"></span><br><span class="line">    internalInstance.push(partialState);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!internalInstance._rendering) &#123;</span><br><span class="line">        FeactReconciler.performUpdateIfNecessary(internalInstance);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>基本上完成啦。</p>
+<h3 id="setState陷阱"><a href="#setState陷阱" class="headerlink" title="setState陷阱"></a><code>setState</code>陷阱</h3><p>现在，我们已经明白了<code>setState</code>的工作原理以及批量工作的概念，但是这里有几个关于<code>setState</code>的陷阱需要注意。我们知道，当我们利用<code>state</code>去更新组件的时候，有好几个步骤，每个步骤中，被挂起的<code>state</code>需要一个一个的处理，也就是说，当我们在<code>setState</code>中使用<code>this.state</code>是非常危险的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">componentWillReceiveProps(nextProps) &#123;</span><br><span class="line">    this.setState(&#123; counter: this.state.counter + 1 &#125;);</span><br><span class="line">    this.setState(&#123; counter: this.state.counter + 1 &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个例子中，我们期待执行2次加法运算。但是，<code>state</code>会被批量处理，所以第二次<code>setState</code>和第一次的<code>setState</code>有相同的输入，所以，加法运算只会执行一次。</p>
+<p><code>React</code>中，解决这个问题的方法是传入一个回调函数</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">componentWillReceiveProps(nextProps) &#123;</span><br><span class="line">    <span class="keyword">this</span>.setState(<span class="function">(<span class="params">currentState</span>) =&gt;</span> (&#123;</span><br><span class="line">        counter: currentState.counter + <span class="number">1</span></span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">this</span>.setState(<span class="function">(<span class="params">currentState</span>) =&gt;</span> (&#123;</span><br><span class="line">        counter: currentState.counter + <span class="number">1</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当传入回调函数的时候，我们将会得到正确的结果，我们将这个特性运用到<code>Feact</code>中去</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">_processPendingState() &#123;</span><br><span class="line">    <span class="keyword">const</span> inst = <span class="keyword">this</span>._instance;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">this</span>._pendingPartialState) &#123;</span><br><span class="line">        <span class="keyword">return</span> inst.state;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> nextState = inst.state;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; <span class="keyword">this</span>._pendingPartialState.length; ++i) &#123;</span><br><span class="line">        <span class="keyword">const</span> partialState = <span class="keyword">this</span>._pendingPartialState[i];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">typeof</span> partialState === <span class="string">'function'</span>) &#123;</span><br><span class="line">            nextState = partialState(nextState);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            nextState = <span class="built_in">Object</span>.assign(nextState, patialState);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>._pendingPartialState = <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">return</span> nextState;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>至此，大功告成啦！</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/19/React原理（三）更新/" rel="next" title="React原理（三）更新">
+                <i class="fa fa-chevron-left"></i> React原理（三）更新
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/11/自适应照片墙布局/" rel="prev" title="自适应照片墙布局">
+                自适应照片墙布局 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Lyanbin">
+            
+              <p class="site-author-name" itemprop="name">Lyanbin</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">6</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/Lyanbin" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#给Feact添加state"><span class="nav-number">1.</span> <span class="nav-text">给Feact添加state</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#getInitialState"><span class="nav-number">1.1.</span> <span class="nav-text">getInitialState</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#增加简单的setState"><span class="nav-number">2.</span> <span class="nav-text">增加简单的setState()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#让setState代入到updateComponent方法中"><span class="nav-number">3.</span> <span class="nav-text">让setState代入到updateComponent方法中</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#通过新的state更新"><span class="nav-number">3.1.</span> <span class="nav-text">通过新的state更新</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#批量调用setState"><span class="nav-number">4.</span> <span class="nav-text">批量调用setState</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#首先我们需要给需要批量的操作保存起来"><span class="nav-number">4.1.</span> <span class="nav-text">首先我们需要给需要批量的操作保存起来</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其次将批量合并之后的state塞到一次渲染过程中"><span class="nav-number">4.2.</span> <span class="nav-text">其次将批量合并之后的state塞到一次渲染过程中</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#setState陷阱"><span class="nav-number">5.</span> <span class="nav-text">setState陷阱</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Lyanbin</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.6"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.6"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.6"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.6"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.6"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
